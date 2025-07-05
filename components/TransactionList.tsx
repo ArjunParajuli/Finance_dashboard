@@ -9,12 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from './ui/badge';
 import { Edit, Trash2, Plus, Receipt } from 'lucide-react';
 import TransactionForm from './TransactionForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { TransactionInput } from '../models/transaction';
 
 interface TransactionListProps {
   transactions: Transaction[];
   onDelete?: (id: string) => void;
-  onUpdate?: (id: string, transaction: any) => void;
+  onUpdate?: (id: string, transaction: TransactionInput) => void;
   isLoading?: boolean;
 }
 
@@ -32,7 +33,7 @@ export default function TransactionList({
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdate = async (transactionData: any) => {
+  const handleUpdate = async (transactionData: TransactionInput) => {
     if (editingTransaction && onUpdate) {
       await onUpdate(editingTransaction._id?.toString() || '', transactionData);
       setIsEditDialogOpen(false);

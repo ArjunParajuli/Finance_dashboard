@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import TransactionForm from '../../components/TransactionForm';
 import TransactionList from '../../components/TransactionList';
@@ -22,30 +21,7 @@ export default function Dashboard() {
     fetchTransactions();
   }, []);
 
-  useEffect(() => {
-    calculateMonthlyStats();
-  }, [transactions]);
-
-  const fetchTransactions = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await fetch('/api/transactions');
-      if (response.ok) {
-        const data = await response.json();
-        setTransactions(data);
-      } else {
-        throw new Error('Failed to fetch transactions');
-      }
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-      setError('Failed to load transactions. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const calculateMonthlyStats = () => {
+  const calculateMonthlyStats = useCallback(() => {
     const stats: { [key: string]: MonthlyStats } = {};
     
     transactions.forEach(transaction => {
@@ -77,6 +53,29 @@ export default function Dashboard() {
       if (a.year !== b.year) return a.year - b.year;
       return a.month - b.month;
     }));
+  }, [transactions]);
+
+  useEffect(() => {
+    calculateMonthlyStats();
+  }, [calculateMonthlyStats]);
+
+  const fetchTransactions = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetch('/api/transactions');
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data);
+      } else {
+        throw new Error('Failed to fetch transactions');
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      setError('Failed to load transactions. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAddTransaction = async (transactionData: TransactionInput) => {

@@ -69,31 +69,26 @@ export default function MonthlyBarChart({ data, isLoading = false }: MonthlyBarC
     return `${months[parseInt(month) - 1]} ${year}`;
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: {
+    active?: boolean;
+    payload?: Array<{
+      value: number;
+      dataKey: string;
+      color: string;
+    }>;
+    label?: string;
+  }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 mb-2">{formatXAxis(label)}</p>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-green-600 font-medium">Income:</span>
-              <span className="font-bold text-green-600">{formatCurrency(payload[0]?.value || 0)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-red-600 font-medium">Expenses:</span>
-              <span className="font-bold text-red-600">{formatCurrency(payload[1]?.value || 0)}</span>
-            </div>
-            <div className="border-t pt-2">
-              <div className="flex items-center justify-between">
-                <span className={`font-semibold ${payload[2]?.value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  Net:
-                </span>
-                <span className={`font-bold ${payload[2]?.value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(payload[2]?.value || 0)}
-                </span>
-              </div>
-            </div>
-          </div>
+          <p className="font-semibold text-gray-900 mb-2">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.dataKey === 'income' ? 'Income' : 
+               entry.dataKey === 'expenses' ? 'Expenses' : 'Net'}: 
+              ${entry.value.toFixed(2)}
+            </p>
+          ))}
         </div>
       );
     }
@@ -119,7 +114,7 @@ export default function MonthlyBarChart({ data, isLoading = false }: MonthlyBarC
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="month" 
                 tickFormatter={formatXAxis}
@@ -135,9 +130,12 @@ export default function MonthlyBarChart({ data, isLoading = false }: MonthlyBarC
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend 
-                verticalAlign="top" 
-                height={36}
-                wrapperStyle={{ paddingBottom: '10px' }}
+                wrapperStyle={{ paddingTop: '20px' }}
+                formatter={(value) => (
+                  <span style={{ color: '#374151', fontSize: '14px' }}>
+                    {value === 'income' ? 'Income' : value === 'expenses' ? 'Expenses' : 'Net'}
+                  </span>
+                )}
               />
               <Bar 
                 dataKey="income" 
